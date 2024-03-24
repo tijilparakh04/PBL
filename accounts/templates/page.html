@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerPoint Enhancer</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'page.css' %}">
+</head>
+<body>
+    <div class="container">
+        <!-- Buttons for signup and login -->
+        <div class="header-buttons">
+            <a href="{% url 'signup' %}">Signup</a>
+            <a href="{% url 'login' %}">Login</a>
+        </div>
+        
+        <h1>Upload Your PowerPoint Presentation</h1>
+        <form action="{%url 'upload_ppt'%}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="ppt_file" required>
+            <button type="submit">Upload and Enhance</button>
+        </form>
+    </div>
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

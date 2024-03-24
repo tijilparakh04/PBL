@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'entry.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome</h2>
+        <p>Please select an option:</p>
+        <div class="options">
+            <a href="{% url 'signup' %}" class="btn create-account">Create New Account</a>
+            <a href="{% url 'login' %}" class="btn login">Login</a>
+        </div>
+    </div>
+</body>
+</html>

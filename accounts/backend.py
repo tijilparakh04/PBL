@@ -5,7 +5,7 @@ from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 
 # Replace 'your-api-key' with your actual OpenAI API key
-api_key = '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'
+api_key = ''
 
 # Initialize OpenAI client with your API key
 client = OpenAI(api_key=api_key)

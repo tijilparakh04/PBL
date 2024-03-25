@@ -2,15 +2,12 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from .forms import SignUpForm
-from django.http import HttpRequest
-from django.http import HttpResponse
-from .backend import process_ppt  
+from django.http import HttpRequest, HttpResponse
+from .backend import process_ppt
 import os
-
 
 def upload_ppt(request):
     if request.method == 'POST':
-        # Assuming the form contains a file input with name 'ppt_file'
         ppt_file = request.FILES.get('ppt_file')
         if ppt_file:
             try:
@@ -30,10 +27,6 @@ def upload_ppt(request):
             except Exception as e:
                 return HttpResponse(f"An error occurred: {str(e)}", status=500)
     return render(request, 'page.html')
-
-def entry(request: HttpRequest):
-    return render(request, 'entry.html')
-
 
 def entry(request: HttpRequest):
     return render(request, 'entry.html')

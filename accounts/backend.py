@@ -94,21 +94,16 @@ def process_ppt(ppt_file_path):
 
             # Set the font properties for the entire text box
             for paragraph in tf.paragraphs:
-                for run in paragraph.runs:
-                    run.font.size = Pt(20)  # Set text size to 20 points
-                    run.font.name = "Times New Roman"  # Set font to Times New Roman
-                    
-                    # Set font color to a predefined theme color
-                    run.font.color.rgb = RGBColor(0,0,0)  # Example theme color
-                    
-                    # Alternatively, set font color using hex color code
-                    # run.font.color.rgb = RGBColor.from_string('FF5733')  # Example hex color code
+                run = paragraph.add_run()
+                run.font.size = Pt(20)  # Set text size to 20 points
+                run.font.name = "Times New Roman"  # Set font to Times New Roman
+                run.font.color.rgb = RGBColor(255,255,255)  # Set text color to white
 
             # Set slide background color to black
             background = slide.background
             fill = background.fill
             fill.solid()
-            fill.fore_color.rgb = RGBColor(255,255,255)  # Set RGB color for black
+            fill.fore_color.rgb = RGBColor(255,255,255)  
 
             # Set the enhanced text for the entire slide in the text box
             tf.text = enhanced_slide_text
@@ -124,4 +119,3 @@ def process_ppt(ppt_file_path):
 # Prompt the user to input the path to the PowerPoint file
 #ppt_file_path = input("Enter the path to the PowerPoint file: ")
 #enhanced_ppt_path = process_ppt(ppt_file_path)
-

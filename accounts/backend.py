@@ -3,9 +3,12 @@ from pptx import Presentation
 from pptx.util import Pt
 from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 # Replace 'your-api-key' with your actual OpenAI API key
-api_key = ''
+api_key = os.getenv('api_key')
 
 # Initialize OpenAI client with your API key
 client = OpenAI(api_key=api_key)
@@ -91,16 +94,21 @@ def process_ppt(ppt_file_path):
 
             # Set the font properties for the entire text box
             for paragraph in tf.paragraphs:
-                run = paragraph.add_run()
-                run.font.size = Pt(20)  # Set text size to 20 points
-                run.font.name = "Times New Roman"  # Set font to Times New Roman
-                run.font.color.rgb = RGBColor(255,255,255)  # Set text color to white
+                for run in paragraph.runs:
+                    run.font.size = Pt(20)  # Set text size to 20 points
+                    run.font.name = "Times New Roman"  # Set font to Times New Roman
+                    
+                    # Set font color to a predefined theme color
+                    run.font.color.rgb = RGBColor(0,0,0)  # Example theme color
+                    
+                    # Alternatively, set font color using hex color code
+                    # run.font.color.rgb = RGBColor.from_string('FF5733')  # Example hex color code
 
             # Set slide background color to black
             background = slide.background
             fill = background.fill
             fill.solid()
-            fill.fore_color.rgb = RGBColor(0, 0, 0)  # Set RGB color for black
+            fill.fore_color.rgb = RGBColor(255,255,255)  # Set RGB color for black
 
             # Set the enhanced text for the entire slide in the text box
             tf.text = enhanced_slide_text

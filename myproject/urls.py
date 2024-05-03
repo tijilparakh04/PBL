@@ -11,8 +11,7 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),
     path('signup.html', views.signup, name='signup_html'),
     path('signup.html', views.user_login, name='login_html'),
-    path('preview_ppt/<str:ppt_id>/', views.preview_ppt, name='preview_ppt'), 
-
+    path('preview_ppt/<str:ppt_id>/', views.preview_ppt, name='preview_ppt'),
     # Other URLs
 ]
 #+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

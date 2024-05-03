@@ -1,3 +1,4 @@
+import base64
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.shortcuts import render, redirect
@@ -9,8 +10,6 @@ import os
 from bson import ObjectId  
 from django.template.response import TemplateResponse
 import pymongo
-from django.http import FileResponse
-
 
 client = pymongo.MongoClient(settings.MONGODB_URI)
 db = client[settings.MONGODB_NAME]
@@ -39,7 +38,9 @@ def upload_ppt(request):
                 os.remove('temp.pptx')
                 
                 # Redirect to the preview page with the MongoDB document ID
-                return redirect('preview_ppt', ppt_id=str(ppt_doc['_id']))
+                ppt_id_str = str(ppt_doc['_id'])  # Convert ObjectId to string
+
+                return redirect('preview_ppt', ppt_id=ppt_id_str)
             except Exception as e:
                 return HttpResponse(f"An error occurred: {str(e)}", status=500)
     return render(request, 'page.html')
@@ -83,14 +84,17 @@ def user_logout(request):
     messages.info(request, 'Logged out successfully.')
     return redirect('login')  # Redirect to login page after logout
 
-
 def preview_ppt(request, ppt_id):
     try:
         # Find the MongoDB document by ID
         ppt_doc = collection.find_one({'_id': ObjectId(ppt_id)})
         if ppt_doc:
             ppt_data = ppt_doc['data']
-            return FileResponse(ppt_data, content_type='application/vnd.openxmlformats-officedocument.presentationml.presentation')
+
+            # Return the PowerPoint presentation as a response with appropriate content type and filename
+            response = HttpResponse(ppt_data, content_type='application/vnd.openxmlformats-officedocument.presentationml.presentation')
+            response['Content-Disposition'] = f'inline; filename={ppt_doc["name"]}'
+            return response
         else:
             return HttpResponse("Presentation not found.", status=404)
     except Exception as e:

@@ -2,24 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preview PowerPoint</title>
-    <!-- Viewer.js CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.7.1/viewer.min.css">
-    <!-- Viewer.js JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.7.1/viewer.min.js"></script>
+    <title>Presentation Preview</title>
+    <script src="https://cdn.jsdelivr.net/npm/pptxjs@latest/dist/pptx.js"></script>
 </head>
 <body>
-    <div id="ppt-container">
-        <!-- Render PowerPoint presentation here -->
-    </div>
+    <h1>Presentation Preview</h1>
+    <div id="presentation-container"></div>
     <script>
-        // Initialize Viewer.js
-        var viewer = new Viewer(document.getElementById('ppt-container'), {
-            url: '{% url "preview_ppt" ppt_id %}', // Replace 'ppt_id' with the actual ID
-            navbar: false, // Hide navigation bar
-            toolbar: false // Hide toolbar
-        });
+        // Function to handle downloaded presentation data
+        function handlePresentationData(data) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const arrayBuffer = event.target.result;
+
+                // Use pptxjs to load the presentation from the arrayBuffer
+                pptxjs.load(arrayBuffer)
+                    .then(presentation => {
+                        // Access and display presentation content (slides, etc.)
+                        const slideContainer = document.getElementById('presentation-container');
+
+                        // Example: Iterate through slides and display content (you can customize this)
+                        for (const slide of presentation.slides) {
+                            const slideElement = document.createElement('div');
+                            slideElement.classList.add('slide');
+                            slideContainer.appendChild(slideElement);
+
+                            // Access and display slide content (text boxes, images, etc.)
+                            for (const shape of slide.shapes) {
+                                if (shape.hasOwnProperty('text')) {
+                                    const textElement = document.createElement('p');
+                                    textElement.textContent = shape.text;
+                                    slideElement.appendChild(textElement);
+                                }
+                                // Handle other shapes (images, etc.) as needed
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading presentation:', error);
+                    });
+            };
+            reader.readAsArrayBuffer(data);
+        }
+
+        // Get presentation data from response (assuming you have a way to access it)
+        const presentationDataForm = document.getElementById('presentation-data-form');
+        const presentationDataField = document.getElementById('presentation_data');
+
+        const presentationData = atob(presentationDataField.value); 
+        handlePresentationData(presentationData);
     </script>
 </body>
 </html>

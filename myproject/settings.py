@@ -134,7 +134,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 MONGODB_URI = 'mongodb+srv://tijilparakh04:221Bbakerstreet@tijilparakh04.w87rubp.mongodb.net/'
-MONGODB_NAME = 'pbl'  # Replace 'your_database_name' with your MongoDB database name
+MONGODB_NAME = 'pbl'  
 
 # Connect to MongoDB
 client = pymongo.MongoClient(MONGODB_URI)

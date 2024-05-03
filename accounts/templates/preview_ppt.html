@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview PowerPoint</title>
+    <!-- Viewer.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.7.1/viewer.min.css">
+    <!-- Viewer.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.7.1/viewer.min.js"></script>
+</head>
+<body>
+    <div id="ppt-container">
+        <!-- Render PowerPoint presentation here -->
+    </div>
+    <script>
+        // Initialize Viewer.js
+        var viewer = new Viewer(document.getElementById('ppt-container'), {
+            url: '{% url "preview_ppt" ppt_id %}', // Replace 'ppt_id' with the actual ID
+            navbar: false, // Hide navigation bar
+            toolbar: false // Hide toolbar
+        });
+    </script>
+</body>
+</html>

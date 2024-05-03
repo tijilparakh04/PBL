@@ -5,6 +5,8 @@ from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 import os
 from dotenv import load_dotenv
+import pymongo
+from myproject import settings
 
 load_dotenv()
 # Replace 'your-api-key' with your actual OpenAI API key
@@ -12,6 +14,10 @@ api_key = os.getenv('api_key')
 
 # Initialize OpenAI client with your API key
 client = OpenAI(api_key=api_key)
+
+client1 = pymongo.MongoClient(settings.MONGODB_URI)
+db = client1[settings.MONGODB_NAME]
+collection = db['enhanced_ppt']
 
 def extract_text_from_ppt(ppt_file):
     # Load the PowerPoint presentation
@@ -55,67 +61,36 @@ def enhance_text_with_openai(text):
 
 def process_ppt(ppt_file_path):
     try:
+        # Load the custom PowerPoint template
+        prs = Presentation(r"C:\Users\Udisha\Documents\heklelal.pptx")
+
         # Call the function to extract text from the PowerPoint file
         extracted_text_per_slide = extract_text_from_ppt(ppt_file_path)
 
         # Enhance the text of each slide using OpenAI API
         enhanced_text_per_slide = [enhance_text_with_openai(text) for text in extracted_text_per_slide]
 
-        # Load the PowerPoint presentation
-        prs = Presentation(ppt_file_path)
-
-        # Iterate through each slide in the presentation
+        # Iterate through each slide in the custom template presentation
         for i, slide in enumerate(prs.slides):
-            # Remove existing shapes from the slide layout
-            for placeholder in slide.placeholders:
-                if placeholder.is_placeholder:
-                    slide.shapes._spTree.remove(placeholder._element)
+            # Modify the content of each slide while keeping the layout and formatting from the template
 
-            # Get the slide dimensions
-            slide_width = prs.slide_width
-            slide_height = prs.slide_height
-
-            # Concatenate enhanced text for the slide
-            enhanced_slide_text = ""
-            if i < len(enhanced_text_per_slide):
-                enhanced_slide_text = enhanced_text_per_slide[i]
-
-            # Add a new text box covering the entire slide
-            left = top = 0
-            width = slide_width
-            height = slide_height
-            txBox = slide.shapes.add_textbox(left, top, width, height)
-            tf = txBox.text_frame
-
-            # Set the text box properties
-            tf.word_wrap = True
-            tf.fit_text(max_size=Pt(20))  # Fit text to box and set max size to 20 points
-            tf.paragraphs[0].alignment = PP_ALIGN.LEFT  # Left align the text
-
-            # Set the font properties for the entire text box
-            for paragraph in tf.paragraphs:
-                run = paragraph.add_run()
-                run.font.size = Pt(20)  # Set text size to 20 points
-                run.font.name = "Times New Roman"  # Set font to Times New Roman
-                run.font.color.rgb = RGBColor(255,255,255)  # Set text color to white
-
-            # Set slide background color to black
-            background = slide.background
-            fill = background.fill
-            fill.solid()
-            fill.fore_color.rgb = RGBColor(255,255,255)  
-
-            # Set the enhanced text for the entire slide in the text box
-            tf.text = enhanced_slide_text
+            # For example, you can access and modify text boxes, shapes, etc.:
+            for shape in slide.shapes:
+                if hasattr(shape, "text"):
+                    # Modify text content based on enhanced_text_per_slide
+                    # For example:
+                    shape.text = enhanced_text_per_slide[i]
 
         # Save the modified PowerPoint presentation
         enhanced_ppt_path = "enhanced_presentation.pptx"
         prs.save(enhanced_ppt_path)
         print("Enhanced PowerPoint presentation saved successfully.")
+        with open(enhanced_ppt_path, 'rb') as f:
+            enhanced_ppt_data = f.read()
+            ppt_doc = {'name': 'enhanced_presentation.pptx', 'data': enhanced_ppt_data}
+            collection.insert_one(ppt_doc)
         return enhanced_ppt_path
     except Exception as e:
         print("An error occurred:", str(e))
 
-# Prompt the user to input the path to the PowerPoint file
-#ppt_file_path = input("Enter the path to the PowerPoint file: ")
-#enhanced_ppt_path = process_ppt(ppt_file_path)
+

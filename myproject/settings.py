@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
+import pymongo
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -130,3 +131,12 @@ STATIC_ROOT = BASE_DIR / 'static'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+MONGODB_URI = 'mongodb+srv://tijilparakh04:221Bbakerstreet@tijilparakh04.w87rubp.mongodb.net/'
+MONGODB_NAME = 'pbl'  # Replace 'your_database_name' with your MongoDB database name
+
+# Connect to MongoDB
+client = pymongo.MongoClient(MONGODB_URI)
+db = client[MONGODB_NAME]
+collection = db['enhanced_ppt']

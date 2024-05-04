@@ -1,3 +1,4 @@
+import copy
 from openai import OpenAI
 from pptx import Presentation
 from pptx.util import Pt
@@ -59,38 +60,76 @@ def enhance_text_with_openai(text):
 
     return enhanced_text
 
+
+def SlideCopyFromPasteInto(copyFromPres, slideIndex,  pasteIntoPres):
+
+    # specify the slide you want to copy the contents from
+    slide_to_copy = copyFromPres.slides[slideIndex]
+
+    # Define the layout you want to use from your generated pptx
+
+    slide_layout = pasteIntoPres.slide_layouts.get_by_name("Blank") # names of layouts can be found here under step 3: https://www.geeksforgeeks.org/how-to-change-slide-layout-in-ms-powerpoint/
+    # it is important for slide_layout to be blank since you dont want these "Write your title here" or something like that textboxes
+    # alternative: slide_layout = pasteIntoPres.slide_layouts[copyFromPres.slide_layouts.index(slide_to_copy.slide_layout)]
+    
+    # create now slide, to copy contents to 
+    new_slide = pasteIntoPres.slides.add_slide(slide_layout)
+
+    # create images dict
+    imgDict = {}
+
+    # now copy contents from external slide, but do not copy slide properties
+    # e.g. slide layouts, etc., because these would produce errors, as diplicate
+    # entries might be generated
+    for shp in slide_to_copy.shapes:
+        if 'Picture' in shp.name:
+            # save image
+            with open(shp.name+'.jpg', 'wb') as f:
+                f.write(shp.image.blob)
+
+            # add image to dict
+            imgDict[shp.name+'.jpg'] = [shp.left, shp.top, shp.width, shp.height]
+        else:
+            # create copy of elem
+            el = shp.element
+            newel = copy.deepcopy(el)
+
+            # add elem to shape tree
+            new_slide.shapes._spTree.insert_element_before(newel, 'p:extLst')
+    
+    # things added first will be covered by things added last => since I want pictures to be in foreground, I will add them after others elements
+    # you can change this if you want
+    # add pictures
+    for k, v in imgDict.items():
+        new_slide.shapes.add_picture(k, v[0], v[1], v[2], v[3])
+        os.remove(k)
+
+    return new_slide # this returns slide so you can instantly work with it when it is pasted in presentation
+
+
 def process_ppt(ppt_file_path):
-    try:
-        # Load the custom PowerPoint template
-        prs = Presentation(r"C:\Users\Udisha\Documents\heklelal.pptx")
+  try:
+    prs = Presentation(r"C:\Users\Udisha\Documents\heklelal.pptx")
+    extracted_text_per_slide = extract_text_from_ppt(ppt_file_path)
+    enhanced_text_per_slide = [enhance_text_with_openai(text) for text in extracted_text_per_slide]
+    for enhanced_text in enhanced_text_per_slide:
+      # Add a new slide with a layout (adjust layout as needed)
+      new_slide = SlideCopyFromPasteInto(prs, 0, prs)  # Title and Content layout
+      for shape in new_slide.shapes:
+          if hasattr(shape, "text"):
+              shape.text = enhanced_text
+              for paragraph in shape.text_frame.paragraphs:
+                        for run in paragraph.runs:
+                            run.font.size = Pt(18)
 
-        # Call the function to extract text from the PowerPoint file
-        extracted_text_per_slide = extract_text_from_ppt(ppt_file_path)
+    enhanced_ppt_path = "enhanced_presentation.pptx"
+    prs.save(enhanced_ppt_path)
+    print("Enhanced PowerPoint presentation saved successfully.")
 
-        # Enhance the text of each slide using OpenAI API
-        enhanced_text_per_slide = [enhance_text_with_openai(text) for text in extracted_text_per_slide]
-
-        # Iterate through each slide in the custom template presentation
-        for i, slide in enumerate(prs.slides):
-            # Modify the content of each slide while keeping the layout and formatting from the template
-
-            # For example, you can access and modify text boxes, shapes, etc.:
-            for shape in slide.shapes:
-                if hasattr(shape, "text"):
-                    # Modify text content based on enhanced_text_per_slide
-                    # For example:
-                    shape.text = enhanced_text_per_slide[i]
-
-        # Save the modified PowerPoint presentation
-        enhanced_ppt_path = "enhanced_presentation.pptx"
-        prs.save(enhanced_ppt_path)
-        print("Enhanced PowerPoint presentation saved successfully.")
-        with open(enhanced_ppt_path, 'rb') as f:
-            enhanced_ppt_data = f.read()
-            ppt_doc = {'name': 'enhanced_presentation.pptx', 'data': enhanced_ppt_data}
-            collection.insert_one(ppt_doc)
-        return enhanced_ppt_path
-    except Exception as e:
-        print("An error occurred:", str(e))
-
-
+    with open(enhanced_ppt_path, 'rb') as f:
+                enhanced_ppt_data = f.read()
+                ppt_doc = {'name': 'enhanced_presentation.pptx', 'data': enhanced_ppt_data}
+                collection.insert_one(ppt_doc)
+    return enhanced_ppt_path
+  except Exception as e:
+    print("An error occurred:", str(e))

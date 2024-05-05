@@ -13,11 +13,11 @@
         {% if message %}
             <p class="message">{{ message }}</p>
         {% endif %}
-        <form method="post">
+        <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
             <div class="input-group">
-                <label for="userid">User ID</label>
-                <input type="text" id="userid" name="userid" required>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
             </div>
             <div class="input-group">
                 <label for="password">Password</label>

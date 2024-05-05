@@ -10,6 +10,16 @@ import os
 from bson import ObjectId  
 from django.template.response import TemplateResponse
 import pymongo
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.core.mail import EmailMessage, send_mail
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from . tokens import generate_token
+from pymongo import MongoClient
+from django.contrib.auth.hashers import make_password
 
 client = pymongo.MongoClient(settings.MONGODB_URI)
 db = client[settings.MONGODB_NAME]
@@ -37,7 +47,6 @@ def upload_ppt(request):
                 # Delete the temporary file
                 os.remove('temp.pptx')
                 
-                # Redirect to the preview page with the MongoDB document ID
                 ppt_id_str = str(ppt_doc['_id'])  # Convert ObjectId to string
 
                 return redirect('preview_ppt', ppt_id=ppt_id_str)
@@ -48,54 +57,62 @@ def upload_ppt(request):
 def entry(request: HttpRequest):
     return render(request, 'entry.html')
 
+client = MongoClient(settings.MONGODB_URI)
+db = client[settings.MONGODB_NAME]
+user_collection = db['users']
+
 def signup(request):
     if request.method == 'POST':
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, 'Account created successfully.')
-                return redirect('entry')  # Redirect to entry page after sign-up
-            else:
-                messages.error(request, 'Error creating account. Please try again.')
-    else:
-        form = SignUpForm()
-    return render(request, 'signup.html', {'form': form})
+        username = request.POST['username']
+        email = request.POST['email']
+        password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
 
-def user_login(request):
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Username already exists.')
+            return redirect('signup')
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already exists.')
+            return redirect('signup')
+
+        if password != confirm_password:
+            messages.error(request, 'Passwords do not match.')
+            return redirect('signup')
+
+        
+        user_data = {
+            'username': username,
+            'email': email,
+            'password': password,
+        }
+        try:
+            user_collection.insert_one(user_data)
+            messages.success(request, 'Account created successfully. You can now login.')
+            return redirect('login')
+        except Exception as e:
+            messages.error(request, f'Failed to create account: {str(e)}')
+            return redirect('signup')
+
+    return render(request, 'signup.html')
+
+def login(request):
     if request.method == 'POST':
-        username = request.POST.get('userid')
+        username = request.POST.get('username')
         password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            messages.success(request, 'Login successful.')
-            return redirect('entry')  # Redirect to the entry page after successful login
-        else:
-            messages.error(request, 'Invalid credentials. Please try again.')
+
+        # Check if user exists in MongoDB
+        user_data = user_collection.find_one({'username': username, 'password': password})
+        if user_data:
+            # # Authenticate user in Django
+            # user = authenticate(request, username=username, password=password)
+            # if user is not None:
+                # login(request, user)
+                messages.success(request, 'You are now logged in.')
+                print("hello")
+                return redirect('upload_ppt')  # Replace 'home' with your desired redirect URL after login
+
+        messages.error(request, 'Invalid username or password.')
+        return redirect('login')
+
     return render(request, 'login.html')
-
-def user_logout(request):
-    logout(request)
-    messages.info(request, 'Logged out successfully.')
-    return redirect('login')  # Redirect to login page after logout
-
-def preview_ppt(request, ppt_id):
-    try:
-        # Find the MongoDB document by ID
-        ppt_doc = collection.find_one({'_id': ObjectId(ppt_id)})
-        if ppt_doc:
-            ppt_data = ppt_doc['data']
-
-            # Return the PowerPoint presentation as a response with appropriate content type and filename
-            response = HttpResponse(ppt_data, content_type='application/vnd.openxmlformats-officedocument.presentationml.presentation')
-            response['Content-Disposition'] = f'inline; filename={ppt_doc["name"]}'
-            return response
-        else:
-            return HttpResponse("Presentation not found.", status=404)
-    except Exception as e:
-        return HttpResponse(f"An error occurred: {str(e)}", status=500)

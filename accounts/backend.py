@@ -135,7 +135,9 @@ def process_ppt(ppt_file_path):
         else:
             print("Image ID is None.")
 
-
+    xml_slides = prs.slides._sldIdLst  
+    slides = list(xml_slides)
+    xml_slides.remove(slides[0]) 
     enhanced_ppt_path = "enhanced_presentation.pptx"
     prs.save(enhanced_ppt_path)
     print("Enhanced PowerPoint presentation saved successfully.")

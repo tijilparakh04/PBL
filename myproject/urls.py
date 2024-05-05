@@ -8,10 +8,9 @@ urlpatterns = [
     path('', views.upload_ppt, name='upload_ppt'),
     path('entry/', views.entry, name='entry'),
     path('signup/', views.signup, name='signup'),
-    path('login/', views.user_login, name='login'),
+    path('login/', views.login, name='login'),
     path('signup.html', views.signup, name='signup_html'),
-    path('signup.html', views.user_login, name='login_html'),
-    path('preview_ppt/<str:ppt_id>/', views.preview_ppt, name='preview_ppt'),
+    path('signup.html', views.login, name='login_html'),
     # Other URLs
 ]
 #+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

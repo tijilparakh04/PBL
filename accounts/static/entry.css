@@ -1,55 +1,69 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f6f6f6;
+body, html {
+    height: 100%;
     margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
 }
 
 .container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 320px;
-    text-align: center;
-}
-
-h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.options {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    gap: 10px;
+    height: 100%;
 }
 
-.btn {
-    padding: 10px 20px;
-    border-radius: 4px;
-    text-decoration: none;
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+input[type="file"] {
+    background-color: #333;
     color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
 }
 
-.create-account {
-    background-color: #007bff;
+button {
+    background-color: #0066cc;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
-.create-account:hover {
+button:hover {
     background-color: #0056b3;
 }
-
-.login {
-    background-color: #28a745;
+/* Style for the buttons container */
+.header-buttons {
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
-.login:hover {
-    background-color: #218838;
+/* Style for the buttons */
+.header-buttons a {
+    margin-left: 10px;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    padding: 8px 16px;
+    border: 2px solid #333;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Hover effect for buttons */
+.header-buttons a:hover {
+    background-color: #333;
+    color: #fff;
 }

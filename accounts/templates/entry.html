@@ -3,18 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
+    <title>PowerPoint Enhancer</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'entry.css' %}">
+    <link rel="stylesheet" href="{% static 'page.css' %}">
 </head>
 <body>
     <div class="container">
-        <h2>Welcome</h2>
-        <p>Please select an option:</p>
-        <div class="options">
-            <a href="{% url 'signup' %}" class="btn create-account">Create New Account</a>
-            <a href="{% url 'login' %}" class="btn login">Login</a>
+        <div class="header-buttons">
+            <a href="{% url 'past' %}">Signup</a>
         </div>
+        
+        <h1>Upload Your PowerPoint Presentation</h1>
+        <form action="{%url 'upload_ppt'%}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="ppt_file" required>
+            <button type="submit">Upload and Enhance</button>
+        </form>
     </div>
+    <script src="{% static 'script.js' %}"></script>
 </body>
 </html>

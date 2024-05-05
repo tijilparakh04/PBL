@@ -101,7 +101,7 @@ def SlideCopyFromPasteInto(copyFromPres, slideIndex,  pasteIntoPres):
     return new_slide # this returns slide so you can instantly work with it when it is pasted in presentation
 
 
-def process_ppt(ppt_file_path):
+def process_ppt(ppt_file_path, username):
   try:
     prs = Presentation(r"C:\Users\Udisha\Documents\heklelal.pptx")
     extracted_text_per_slide = extract_text_from_ppt(ppt_file_path)
@@ -144,7 +144,7 @@ def process_ppt(ppt_file_path):
 
     with open(enhanced_ppt_path, 'rb') as f:
                 enhanced_ppt_data = f.read()
-                ppt_doc = {'name': 'enhanced_presentation.pptx', 'data': enhanced_ppt_data}
+                ppt_doc = {'name': 'enhanced_presentation.pptx', 'data': enhanced_ppt_data, 'user': username}
                 collection.insert_one(ppt_doc)
     return enhanced_ppt_path
   except Exception as e:

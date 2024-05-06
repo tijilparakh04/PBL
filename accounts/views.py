@@ -29,21 +29,17 @@ collection = db['enhanced_ppt']
 
 def upload_ppt(request):
     if request.method == 'POST':
-        # Retrieve the username from the session
         username = request.session.get('username')
 
-        # Check if the username is present in the session
         if username:
             ppt_file = request.FILES.get('ppt_file')
             
             if ppt_file:
                 try:
-                    # Save the uploaded file to a temporary location
                     with open('temp.pptx', 'wb') as f:
                         for chunk in ppt_file.chunks():
                             f.write(chunk)
                     
-                    # Process the uploaded PowerPoint file
                     enhanced_ppt_path = process_ppt('temp.pptx', username)
                     with open(enhanced_ppt_path, 'rb') as f:
                         enhanced_ppt_data = f.read()
@@ -51,7 +47,6 @@ def upload_ppt(request):
                         result = collection.insert_one(ppt_doc)
                         inserted_id = result.inserted_id    
                     
-                    # Delete the temporary file
                     os.remove('temp.pptx')
                     current_ppt = collection.find({'_id': inserted_id})
                     modified_ppts = []
@@ -62,16 +57,13 @@ def upload_ppt(request):
                 except Exception as e:
                     return HttpResponse(f"An error occurred: {str(e)}", status=500)
         else:
-            # If username is not present in the session, redirect to the login page
             return redirect('login')
     return render(request, 'page.html')
 
 def view_past_ppts(request):
         username = request.session.get('username')
 
-        # Check if the username is present in the session
         if username:
-            # Retrieve all PowerPoint presentations where the user attribute matches the username
             past_ppts = collection.find({'user': username})
             modified_ppts = []
             for ppt in past_ppts:
@@ -134,7 +126,6 @@ def login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # Check if user exists in MongoDB
         user_data = user_collection.find_one({'username': username, 'password': password})
         if user_data:
                 request.session['username'] = username
@@ -150,16 +141,13 @@ def download_presentation(request, presentation_id):
     presentation = collection.find_one({'_id': ObjectId(presentation_id)})
 
     if presentation:
-        # Retrieve presentation data and metadata
         presentation_data = presentation['data']
         filename = presentation['name']
 
-        # Determine the MIME type of the presentation
         content_type, _ = mimetypes.guess_type(filename)
         if not content_type:
             content_type = 'application/octet-stream'
 
-        # Set response headers for file download
         response = HttpResponse(presentation_data, content_type=content_type)
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response

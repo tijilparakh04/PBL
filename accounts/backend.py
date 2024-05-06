@@ -15,10 +15,8 @@ from pptx.util import Inches
 
 
 load_dotenv()
-# Replace 'your-api-key' with your actual OpenAI API key
 api_key = os.getenv('api_key')
 
-# Initialize OpenAI client with your API key
 client = OpenAI(api_key=api_key)
 
 client1 = pymongo.MongoClient(settings.MONGODB_URI)
@@ -27,41 +25,29 @@ collection = db['enhanced_ppt']
 collection1 = db['gen_images']
 
 def extract_text_from_ppt(ppt_file):
-    # Load the PowerPoint presentation
     prs = Presentation(ppt_file)
 
-    # Initialize an empty list to store the extracted text from each slide
     extracted_text_per_slide = []
 
-    # Iterate through each slide in the presentation
     for slide in prs.slides:
-        # Initialize an empty string to store the text of the current slide
         slide_text = ""
 
-        # Iterate through each shape (text box) in the slide
         for shape in slide.shapes:
-            # Check if the shape has text
             if hasattr(shape, "text"):
-                # Concatenate the text from the shape to the slide_text string
                 slide_text += shape.text + "\n"
 
-        # Append the slide_text string to the list
         extracted_text_per_slide.append(slide_text)
 
-    # Return the list containing the text of each slide
     return extracted_text_per_slide
 
 def enhance_text_with_openai(text):
 
-    # Choose an available engine for text enhancement
     engine = "gpt-3.5-turbo-1106"  # Replace with the engine you want to use
 
-    # Generate enhanced text using the chosen engine
     response = client.chat.completions.create(model=engine,
                                               messages=[{"role": "user", "content": text}],
                                               max_tokens=150)
 
-    # Get the enhanced text from the response
     enhanced_text = response.choices[0].message.content
 
     return enhanced_text
@@ -80,26 +66,21 @@ def SlideCopyFromPasteInto(copyFromPres, slideIndex,  pasteIntoPres):
    
     for shp in slide_to_copy.shapes:
         if 'Picture' in shp.name:
-            # save image
             with open(shp.name+'.jpg', 'wb') as f:
                 f.write(shp.image.blob)
 
-            # add image to dict
             imgDict[shp.name+'.jpg'] = [shp.left, shp.top, shp.width, shp.height]
         else:
-            # create copy of elem
             el = shp.element
             newel = copy.deepcopy(el)
 
-            # add elem to shape tree
             new_slide.shapes._spTree.insert_element_before(newel, 'p:extLst')
     
     for k, v in imgDict.items():
         new_slide.shapes.add_picture(k, v[0], v[1], v[2], v[3])
         os.remove(k)
 
-    return new_slide # this returns slide so you can instantly work with it when it is pasted in presentation
-
+    return new_slide 
 
 def process_ppt(ppt_file_path, username):
   try:
@@ -107,7 +88,6 @@ def process_ppt(ppt_file_path, username):
     extracted_text_per_slide = extract_text_from_ppt(ppt_file_path)
     enhanced_text_per_slide = [enhance_text_with_openai(text) for text in extracted_text_per_slide]
     for enhanced_text in enhanced_text_per_slide:
-        # Add a new slide with a layout (adjust layout as needed)
         new_slide = SlideCopyFromPasteInto(prs, 0, prs)  # Title and Content layout
         for shape in new_slide.shapes:
             if hasattr(shape, "text"):
@@ -149,15 +129,12 @@ def process_ppt(ppt_file_path, username):
 def generate_keywords(text):
     
     
-    # Choose an available engine for text enhancement
     engine = "gpt-3.5-turbo-1106"  # Replace with the engine you want to use
     text = text + "give me the most important keyword, in such a sentence format, that I can use to generate image using Dall E"
-    # Generate enhanced text using the chosen engine
     response = client.chat.completions.create(model=engine,
                                               messages=[{"role": "user", "content": text}],
                                               max_tokens=150)
 
-    # Get the enhanced text from the response
     enhanced_text = response.choices[0].message.content
     
     return enhanced_text
@@ -178,7 +155,6 @@ def generate_image(text):
     
     image_response = requests.get(image_url)
 
-    # Check if the request was successful
     if image_response.status_code == 200:
         img_data = image_response.content
         if img_data:

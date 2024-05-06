@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{% static 'login.css' %}">
 </head>
 <body>
+    <div class = "main-container">
     <div class="container">
         <h2>Login</h2>
         {% if message %}
@@ -26,6 +27,12 @@
             <button type="submit" class="btn">Login</button>
         </form>
     </div>
+    <div class="signup-section">
+        <p>I don't have an account</p>
+        <button class="btn" type="submit" onclick="window.location.href = 'signup.html';">Sign Up</button>
+    </div>
+    </div>
+    
     <script src="{% static 'login.js' %}"></script>
 </body>
 </html>

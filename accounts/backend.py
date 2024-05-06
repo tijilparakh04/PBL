@@ -140,12 +140,8 @@ def process_ppt(ppt_file_path, username):
     xml_slides.remove(slides[0]) 
     enhanced_ppt_path = "enhanced_presentation.pptx"
     prs.save(enhanced_ppt_path)
-    print("Enhanced PowerPoint presentation saved successfully.")
 
-    with open(enhanced_ppt_path, 'rb') as f:
-                enhanced_ppt_data = f.read()
-                ppt_doc = {'name': 'enhanced_presentation.pptx', 'data': enhanced_ppt_data, 'user': username}
-                collection.insert_one(ppt_doc)
+    
     return enhanced_ppt_path
   except Exception as e:
     print("An error occurred:", str(e))

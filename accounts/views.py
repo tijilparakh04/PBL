@@ -45,11 +45,20 @@ def upload_ppt(request):
                     
                     # Process the uploaded PowerPoint file
                     enhanced_ppt_path = process_ppt('temp.pptx', username)
-
+                    with open(enhanced_ppt_path, 'rb') as f:
+                        enhanced_ppt_data = f.read()
+                        ppt_doc = {'name': 'enhanced_presentation.pptx', 'data': enhanced_ppt_data, 'user': username}
+                        result = collection.insert_one(ppt_doc)
+                        inserted_id = result.inserted_id    
+                    
                     # Delete the temporary file
                     os.remove('temp.pptx')
-                    
-                    
+                    current_ppt = collection.find({'_id': inserted_id})
+                    modified_ppts = []
+                    for ppt in current_ppt:
+                        ppt['str_id'] = str(ppt['_id'])
+                        modified_ppts.append(ppt)
+                    return render(request, 'current.html', {'current_ppt': modified_ppts})
                 except Exception as e:
                     return HttpResponse(f"An error occurred: {str(e)}", status=500)
         else:
@@ -76,6 +85,9 @@ def view_past_ppts(request):
 
 def entry(request: HttpRequest):
     return render(request, 'entry.html')
+
+def about(request: HttpRequest):
+    return render(request, 'about.html')
 
 client = MongoClient(settings.MONGODB_URI)
 db = client[settings.MONGODB_NAME]
@@ -133,7 +145,6 @@ def login(request):
         return redirect('login')
 
     return render(request, 'login.html')
-
 
 def download_presentation(request, presentation_id):
     presentation = collection.find_one({'_id': ObjectId(presentation_id)})

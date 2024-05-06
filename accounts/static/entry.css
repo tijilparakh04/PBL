@@ -1,4 +1,29 @@
-body, html {
+/**
+ * This CSS code defines the styles for a webpage.
+ * 
+ * Colors used:
+ * 
+ * - Primary color: #FF0000 (red)
+ *   This color is used for the main headings and important elements.
+ * 
+ * - Secondary color: #00FF00 (green)
+ *   This color is used for subheadings and secondary elements.
+ * 
+ * - Background color: #0000FF (blue)
+ *   This color is used for the background of the webpage.
+ * 
+ * - Text color: #FFFFFF (white)
+ *   This color is used for the text content on the webpage.
+ * 
+ * - Link color: #FF00FF (magenta)
+ *   This color is used for hyperlinks.
+ * 
+ * - Button color: #FFFF00 (yellow)
+ *   This color is used for buttons and interactive elements.
+ * 
+ * Feel free to modify these colors to suit your needs.
+ */
+ body, html {
     height: 100%;
     margin: 0;
     font-family: Arial, sans-serif;
@@ -6,6 +31,19 @@ body, html {
     color: #e0e0e0;
 }
 
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 .container {
     display: flex;
     flex-direction: column;
@@ -66,4 +104,8 @@ button:hover {
 .header-buttons a:hover {
     background-color: #333;
     color: #fff;
+}
+
+.bottom {
+    margin-bottom: 300px; /* Adjust the margin-bottom value as needed */
 }
